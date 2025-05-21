@@ -9,10 +9,6 @@ LOGS_FOLDER="/var/log/roboshop-logs"
 SCRIPT_NAME=$(echo $0 | cut -d ":" -f1)
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
 
-# Create log folder
-mkdir -p $LOGS_FOLDER
-echo "Script started executing: $(date)" | tee -a $LOG_FILE
-
 # Check if the user has proper privileges to run the script
 if [ $USERID -ne 0 ]
 then
@@ -21,6 +17,10 @@ then
 else
     echo "You are running with root access"  | tee -a $LOG_FILE
 fi
+
+# Create log folder
+mkdir -p $LOGS_FOLDER
+echo "Script started executing: $(date)" | tee -a $LOG_FILE
 
 ########################
 # Funtion: Validation
@@ -46,7 +46,7 @@ VALIDATE $? "Installing mongodb server"
 systemctl enable mongod &>>$LOG_FILE
 VALIDATE $? "Enabling MongoDB"
 
-sysetmctl start mongod &>>$LOG_FILE
+systemctl start mongod &>>$LOG_FILE
 VALIDATE $? "Starting MongoDB"
 
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
