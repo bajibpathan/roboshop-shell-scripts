@@ -47,8 +47,14 @@ VALIDATE $? "Enabling NodeJS default module"
 dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "Installing NodeJS"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
-VALIDATE $? "Creating a roboshop system user"
+id roboshop
+if [ $? -ne 0 ]
+then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+    VALIDATE $? "Creating a roboshop system user"
+else
+    echo -e "System user roboshop already created ... $YELLOW SKIPPING $NOCOLOR" 
+fi
 
 mkdir -p /app
 VALIDATE $? "Creating /app directory"
@@ -58,7 +64,7 @@ VALIDATE $? "Downloading catalogue code to temp directory"
 
 cd /app 
 unzip /tmp/catalogue.zip &>>$LOG_FILE
-VALIDTE $? "Extracting the catalogue code to /app directory"
+VALIDATE $? "Extracting the catalogue code to /app directory"
 
 npm install &>>$LOG_FILE
 VALIDATE $? "Installing dependencies"
