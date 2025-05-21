@@ -82,5 +82,13 @@ cp $SCRIPT_DIR/repos/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing MongoDB Client"
 
-mongosh --host mongodb.robodevops.store </app/db/master-data.js &>>$LOG_FILE
-VALIDATE $? "Copying the data to MongoDB Database"
+STATUS=$(mongosh --host mongodb.robodevops.store --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.robodevops.store </app/db/master-data.js &>>$LOG_FILE
+    VALIDATE $? "Copying the data to MongoDB Database"
+else
+    echo -e "Data is already loaded ... $YELLOW SKIPPING $NOCOLOR"
+fi
+
+ 
