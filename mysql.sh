@@ -24,7 +24,7 @@ fi
 mkdir -p $LOGS_FOLDER
 echo "Script started executing: $(date)" | tee -a $LOG_FILE
 
-echo "Enter roo password"
+echo "Enter root password"
 read -s MYSQL_ROOT_PASSWORD
 ########################
 # Funtion: Validation
@@ -41,11 +41,11 @@ VALIDATE(){
     fi
 }
 
-dnf install mysql-server -y
+dnf install mysql-server -y &>>$LOG_FILE
 VALIDATE $? "Installing  MySql Server"
 
-systemctl enable mysqld
-systemctl start mysqld  
+systemctl enable mysqld &>>$LOG_FILE
+systemctl start mysqld  &>>$LOG_FILE
 VALIDATE $? "Enabling and Starting MySql Server"
 
 
