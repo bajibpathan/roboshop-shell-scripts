@@ -1,5 +1,6 @@
 #!/bin/bash
 
+START_TIME=$(date +%s)
 USERID=$(id -u)
 RED="\e[31m"
 GREEN="\e[32m"
@@ -8,7 +9,6 @@ NOCOLOR="\e[0m"
 LOGS_FOLDER="/var/log/roboshop-logs"
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
-SCRIPT_DIR=$PWD
 
 # Check if the user has proper privileges to run the script
 if [ $USERID -ne 0 ]
@@ -38,31 +38,22 @@ VALIDATE(){
     fi
 }
 
-dnf module disable nginx -y &>>$LOG_FILE
-VALIDATE $? "Disabling the nginx modules"
+dnf module disable redis -y &>>$LOG_FILE
+VALIDATE $? "Disabling default redis module"
 
-dnf module enable nginx:1.24 -y &>>$LOG_FILE
-VALIDATE $? "Enabling the nginx modules"
+dnf module enable redis:7 -y &>>$LOG_FILE
+VALIDATE $? "Enabling redis 7 module"
 
-dnf install nginx -y &>>$LOG_FILE
-VALIDATE $? "Installing nginx"
+dnf install redis -y &>>$LOG_FILE
+VALIDATE $? "Installing Redis"
 
-systemctl enable nginx &>>$LOG_FILE
-systemctl start nginx &>>$LOG_FILE
-VALIDATE $? "Starting nginx"
+sed -i -e 's/127.0.0.1/0.0.0.0/g' -e 's/protected-mode/ c protected-mode no'/etc/redis/redis.conf
+VALIDATE $? "Edited redis.conf to accept remote connections"
 
-rm -rf /usr/share/nginx/html/*
-VALIDTE $? "Removing default content"
+systemctl enable redis &>>$LOG_FILE
+systemctl start redis &>>$LOG_FILE
+VALIDATE $? "Enabling and starting redis"
 
-curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
-VALIDATE $? "Downloading the content"
-
-cd /usr/share/nginx/html 
-unzip /tmp/frontend.zip &>>$LOG_FILE
-VALIDATE $? "Unzipping the frontend content"
-
-cp $SCRIPT_DIR/conf/nginx.conf /etc/nginx/nginx.conf
-VALIDATE $? "Copying nginx configuration"
-
-systemctl restart nginx &>>$LOG_FILE
-VALIDATE $? "Restarting the nginx service"
+END_TIME=$(date +%s)
+TOTAL_TIME=$(( $END_TIME - $START_TIME))
+echo -e "Script execution completed successfully, $YELLOW time taken: $TOTAL_TIME $NOCOLOR" | tee -a $LOG_FILE
