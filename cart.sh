@@ -60,24 +60,24 @@ fi
 mkdir -p /app
 VALIDATE $? "Creating /app directory"
 
-curl -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip  &>>$LOG_FILE
-VALIDATE $? "Downloading user code to temp directory"
+curl -o  /tmp/cart.zip https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading cart code to temp directory"
 
 rm -rf /app/*
 cd /app 
-unzip /tmp/user.zip &>>$LOG_FILE
-VALIDATE $? "Extracting the user code to /app directory"
+unzip /tmp/cart.zip &>>$LOG_FILE
+VALIDATE $? "Extracting the cart code to /app directory"
 
 npm install &>>$LOG_FILE
 VALIDATE $? "Installing dependencies"
 
-cp $SCRIPT_DIR/services/user.service /etc/systemd/system/user.service
-VALIDATE $? "Copying User serivce to systemd directory"
+cp $SCRIPT_DIR/services/cart.service /etc/systemd/system/cart.service
+VALIDATE $? "Copying Cart serivce to systemd directory"
 
 systemctl daemon-reload &>>$LOG_FILE
-systemctl enable user &>>$LOG_FILE
-systemctl start user &>>$LOG_FILE
-VALIDATE $? "Enabling & Starting User service"
+systemctl enable cart &>>$LOG_FILE
+systemctl start cart &>>$LOG_FILE
+VALIDATE $? "Enabling & Starting cart service"
 
  
 END_TIME=$(date +%s)
